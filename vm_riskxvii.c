@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
         printf("%x ", result);
 
 
-        printf("%x ", result & 0x7F);
+        int instruction = result & 0x7F
     }
     
     return 0;
