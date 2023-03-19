@@ -4,24 +4,38 @@
 
 
 
+int big_endian(int memory[], int pc_val) {
 
+    int a = memory[pc_val];
+    int b = memory[pc_val + 1];
+    int c = memory[pc_val + 2];
+    int d = memory[pc_val + 3];
+    int instruction = ((((((d << 8) | c) << 8) | b) << 8) | a);
+    return instruction;
+
+}
 
 
 
 int main(int argc, char **argv) {
     int registers[32] = {0};
+    int memory[2048] = {0};
     int pc_val = 0;
     FILE *bin_input = fopen(argv[1], "rb");
-    for (int i = 0; i < 10; i++) {
-        int a = fgetc(bin_input);
-        int b = fgetc(bin_input);
+    for (int i = 0; i < 2048; i++) {
+
         int c = fgetc(bin_input);
-        int d = fgetc(bin_input);
+        printf("%x ", c);
+        memory[pc_val] = c;
+        pc_val += 1;
+    }
 
-        int instruction = ((((((d << 8) | c) << 8) | b) << 8) | a);
+    pc_val = 0;
+    int i = 0; 
+    while (i < 100) {
+        printf("%d\n", pc_val);
+        int instruction = big_endian(memory, pc_val);
         printf("%x ", instruction);
-
-
         int opcode = instruction & 0x7F;
         switch (opcode)
         {
@@ -69,6 +83,7 @@ int main(int argc, char **argv) {
             default:
                 break;
         }
+        i++;
     }
     return 0;
 }
