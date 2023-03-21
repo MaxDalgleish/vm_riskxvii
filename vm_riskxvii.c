@@ -78,7 +78,7 @@ int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem) {
 		}
 		// print signed integer to stdout
 		case 0x804: {
-			printf("virt 3: %d", param);
+			printf("%d", param);
 			return 0;
 		}
 
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 	pc_val = 0;
 	while (pc_val < 1024) {
 		int instruction = big_endian(memory, pc_val);
-		printf("\nINST: %08x, PC: %x ", instruction, pc_val);
+		// printf("\nINST: %08x, PC: %x ", instruction, pc_val);
 		int opcode = instruction & 0x7F;
 		switch (opcode)
 		{
