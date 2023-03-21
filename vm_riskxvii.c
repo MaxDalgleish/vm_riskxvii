@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
 					break;
 				}
 				int rs1 = rs1_extract(instruction);
-				int imm = instruction >> 20 & 0xFFF;
+				int imm = sign_extending((instruction >> 20) & 0xFFF, 12);
 				// load 32 bit value
 				// lw
 				if (func3 == 0b010) {
