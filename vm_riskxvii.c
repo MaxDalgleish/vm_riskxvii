@@ -289,8 +289,7 @@ int main(int argc, char **argv) {
 					reg[rd] = reg[rs1] << reg[rs2];
 				// SHIFT RIGHT
 				} else if (func3 == 0b101 && func7 == 0) {
-					printf("h %x h  d %d d\n", reg[rs1], reg[rs2]);
-					reg[rd] = (reg[rs1] >> reg[rs2]) | 0x00000000;
+					reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
 					printf("a %x a", reg[rd]);
 				// Rotate Right;
 				// SRA
