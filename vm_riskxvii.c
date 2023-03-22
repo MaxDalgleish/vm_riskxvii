@@ -286,13 +286,16 @@ int main(int argc, char **argv) {
 					reg[rd] = reg[rs1] & reg[rs2];
 				// SHIFT LEFT
 				} else if (func3 == 0b001 && func7 == 0) {
+					printf("LE");
 					reg[rd] = reg[rs1] << reg[rs2];
 				// SHIFT RIGHT
 				} else if (func3 == 0b101 && func7 == 0) {
+					printf("A");
 					reg[rd] = reg[rs1] >> reg[rs2];
 				// Rotate Right;
 				// SRA
 				} else if (func3 == 0b101 && func7 == 0x20) {
+					printf("HERE\n");
 					int temp = reg[rs1];
 					for (int i = 0; i < reg[rs2]; i++) {
 						int num = (temp & 0b1) << 31;
