@@ -147,7 +147,6 @@ int main(int argc, char **argv) {
 	pc_val = 0;
 	while (pc_val < 1024) {
 		int instruction = big_endian(memory, pc_val);
-		printf("\nINST: %08x, PC: %x ", instruction, pc_val);
 		int opcode = instruction & 0x7F;
 		switch (opcode)
 		{
