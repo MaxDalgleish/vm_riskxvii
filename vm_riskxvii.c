@@ -290,7 +290,6 @@ int main(int argc, char **argv) {
 				// SHIFT RIGHT
 				} else if (func3 == 0b101 && func7 == 0) {
 					reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
-					printf("a %x a", reg[rd]);
 				// Rotate Right;
 				// SRA
 				} else if (func3 == 0b101 && func7 == 0x20) {
