@@ -90,7 +90,7 @@ int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem) {
 
 		// CPU Halt
 		case 0x80c: {
-			printf("CPU Halt Requesteda\n");
+			printf("CPU Halt Requested\n");
 			exit(0);
 		}
 
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 	pc_val = 0;
 	while (pc_val < 1024) {
 		int instruction = big_endian(memory, pc_val);
-		// printf("\nINST: %08x, PC: %x ", instruction, pc_val);
+		printf("\nINST: %08x, PC: %x ", instruction, pc_val);
 		int opcode = instruction & 0x7F;
 		switch (opcode)
 		{
