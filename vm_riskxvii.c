@@ -145,21 +145,23 @@ int main(int argc, char **argv) {
 	}
 
 	pc_val = 0;
+	int imm, rd, rs1, rs2, func3, func7, opcode, instruction;
 	while (pc_val < 1024) {
-		int instruction = big_endian(memory, pc_val);
+		instruction = big_endian(memory, pc_val);
 		// printf("\nINST: %08x, PC: %x ", instruction, pc_val);
-		int opcode = instruction & 0x7F;
+		opcode = instruction & 0x7F;
 		switch (opcode)
 		{
 			// format I
+			// Add immediate
 			case 0b0010011: {
-				int func3 = func3_extract(instruction);
-				int rd = rd_extract(instruction);
+				func3 = func3_extract(instruction);
+				rd = rd_extract(instruction);
 				if (rd == 0) {
 					break;
 				}
-				int rs1 = rs1_extract(instruction);
-				int imm = sign_extending(instruction >> 20, 12);
+				rs1 = rs1_extract(instruction);
+				imm = sign_extending(instruction >> 20, 12);
 				// addi
 				if (func3 == 0) {
 					reg[rd] = reg[rs1] + imm;
@@ -183,7 +185,7 @@ int main(int argc, char **argv) {
 			}
 			// jal
 			case 0b1101111: {
-				int rd = rd_extract(instruction);
+				rd = rd_extract(instruction);
 				if (rd != 0) {
 					reg[rd] = pc_val + 4;
 				}
@@ -191,85 +193,69 @@ int main(int argc, char **argv) {
 				int imm2 = (instruction >> 20) & 0b1;
 				int imm3 = (instruction >> 12) & 0xFF;
 				int imm4 = (instruction >> 31) & 0b1;
-				int imm = ((((((imm4 << 8) | imm3) << 1) | imm2) << 10) | imm1) << 1;
+				imm = ((((((imm4 << 8) | imm3) << 1) | imm2) << 10) | imm1) << 1;
 				imm = sign_extending(imm, 20);
 				pc_val = pc_val + imm - 4;
 				break;
 			}
 			// lui
 			case 0b0110111: {
-				int rd = rd_extract(instruction);
+				rd = rd_extract(instruction);
 				if (rd == 0) {
 					break;
 				}
-				int imm = ((instruction >> 12) & 0xFFFFF) << 12;
+				imm = ((instruction >> 12) & 0xFFFFF) << 12;
 				reg[rd] = imm;
 				break;
 			}
 			
 			// load functions
 			case 0b0000011: {
-				int func3 = func3_extract(instruction);
-				int rd = rd_extract(instruction);
+				func3 = func3_extract(instruction);
+				rd = rd_extract(instruction);
 				if (rd == 0) {
 					break;
 				}
-				int rs1 = rs1_extract(instruction);
-				int imm = sign_extending((instruction >> 20) & 0xFFF, 12);
+				rs1 = rs1_extract(instruction);
+				imm = sign_extending((instruction >> 20) & 0xFFF, 12);
+				if (reg[rs1] + imm >= 0x800) {
+					reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
+					break;
+				}
 				// load 32 bit value
 				// lw
 				if (func3 == 0b010) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
-					} else {
-						reg[rd] = memory[reg[rs1] + imm];
-					}
+					reg[rd] = memory[reg[rs1] + imm] << 8 | memory[reg[rs1] + imm + 1] << 8 | memory[reg[rs1] + imm + 2] << 8 | memory[reg[rs1] + imm + 3];
 				// load a 16 bit value
 				// lh
 				} else if (func3 == 0b001) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
-					} else {
-						reg[rd] = sign_extending(memory[reg[rs1] + imm] & 0xFFFF, 16);
-					}
+					reg[rd] = sign_extending(memory[reg[rs1] + imm] << 8 | memory[reg[rs1] + imm + 1], 16);
 				// load a 8 bit value
 				// lb
 				} else if (func3 == 0) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
-					} else {
-						reg[rd] = sign_extending(memory[reg[rs1] + imm] & 0xFF, 8);
-					}
+					reg[rd] = sign_extending(memory[reg[rs1] + imm], 8);
 				// load a unsigned 8 bit value
 				// lbu
 				} else if (func3 == 0b100) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
-					} else {
-						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFF;
-					}
+					reg[rd] = (unsigned int) memory[reg[rs1] + imm];
 				// load a unsigned 16 bit value
 				// lhu
 				} else if (func3 == 0b101) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
-					} else {
-						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFFFF;
-					}
+					reg[rd] = (unsigned int) (memory[reg[rs1] + imm] << 8 | memory[reg[rs1] + imm + 1]);
 				}
 				break;
 			}
 
 			// basic bitwise operations
 			case 0b0110011: {
-				int func3 = func3_extract(instruction);
-				int func7 = func7_extract(instruction);
-				int rd = rd_extract(instruction);
+				func3 = func3_extract(instruction);
+				func7 = func7_extract(instruction);
+				rd = rd_extract(instruction);
 				if (rd == 0) {
 					break;
 				}
-				int rs1 = rs1_extract(instruction);
-				int rs2 = rs2_extract(instruction);
+				rs1 = rs1_extract(instruction);
+				rs2 = rs2_extract(instruction);
 				// Add
 				if (func3 == 0 && func7 == 0) {
 					reg[rd] = reg[rs1] + reg[rs2];
@@ -312,43 +298,43 @@ int main(int argc, char **argv) {
 			// Save memory
 			// Type S
 			case 0b0100011: {
-				int func3 = func3_extract(instruction);
-				int rs1 = rs1_extract(instruction);
-				int rs2 = rs2_extract(instruction);
-				int imm = sign_extending(s_imm(instruction), 12);
+				func3 = func3_extract(instruction);
+				rs1 = rs1_extract(instruction);
+				rs2 = rs2_extract(instruction);
+				imm = sign_extending(s_imm(instruction), 12);
+				if (reg[rs1] + imm >= 0x800) {
+					virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
+					break;
+				}
 				// 32 bit value
 				// sw
+
+				// 0 = 6
+				// 1 = 4
+				// 2 = 2
+				// 3 = 0
 				if (func3 == 0b010) {
-					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
-					} else {
-						memory[reg[rs1] + imm] = (reg[rs2] & 0xFFFFFFFF);
+					for (int i = 0; i < 4; i++) {
+						memory[reg[rs1] + imm + i] = (reg[rs2] & (0xFF << (6 - (2 * i))));
 					}
 				// 16 bit value
 				// sh
 				} else if (func3 == 0b001) {
-					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
-					} else {
-						memory[reg[rs1] + imm] = (reg[rs2] & 0xFFFF);
-					}
+					memory[reg[rs1] + imm] = (reg[rs2] & 0xFF00);
+					memory[reg[rs1] + imm + 1] = (reg[rs2] & 0xFF);
 				// 8 bit value
 				// sb
 				} else if (func3 == 0) {
-					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
-					} else {
-						memory[reg[rs1] + imm] = (reg[rs2] & 0xFF);
-					}
+					memory[reg[rs1] + imm] = (reg[rs2] & 0xFF);
 				}
 				break;
 			}
 		
 			case 0b1100011: {
-				int func3 = func3_extract(instruction);
-				int imm = sign_extending(sb_imm(instruction) << 1, 12);
-				int rs2 = rs2_extract(instruction);
-				int rs1 = rs1_extract(instruction);
+				func3 = func3_extract(instruction);
+				imm = sign_extending(sb_imm(instruction) << 1, 12);
+				rs2 = rs2_extract(instruction);
+				rs1 = rs1_extract(instruction);
 				// beq
 				if (func3 == 0) {
 					if (reg[rs1] == reg[rs2]) {
@@ -385,10 +371,10 @@ int main(int argc, char **argv) {
 
 			// jalr
 			case 0b1100111: {
-				int func3 = func3_extract(instruction);
-				int rd = rd_extract(instruction);
-				int rs1 = rs1_extract(instruction);
-				int imm = sign_extending(instruction >> 20, 12);
+				func3 = func3_extract(instruction);
+				rd = rd_extract(instruction);
+				rs1 = rs1_extract(instruction);
+				imm = sign_extending(instruction >> 20, 12);
 				if (func3 == 0) {
 					if (rd != 0) {
 						reg[rd] = pc_val + 4;
