@@ -19,7 +19,7 @@ int big_endian(int memory[], int pc_val) {
 }
 
 void register_dump(int pc, int *reg) {
-	printf("PC = %08x", pc);
+	printf("PC = %08x\n", pc);
 	for (int i = 0; i < 32; i++) {
 		printf("R[%d] = 0x%08x\n", pc, reg[i]);
 	}
