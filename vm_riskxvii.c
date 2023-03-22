@@ -309,14 +309,11 @@ int main(int argc, char **argv) {
 				// 32 bit value
 				// sw
 
-				// 0 = 6
-				// 1 = 4
-				// 2 = 2
-				// 3 = 0
 				if (func3 == 0b010) {
 					for (int i = 0; i < 4; i++) {
 						memory[reg[rs1] + imm + i] = (reg[rs2] & (0xFF << (6 - (2 * i))));
 					}
+					printf("%d %d %d %d", memory[reg[rs1] + imm], memory[reg[rs1] + imm + 1], memory[reg[rs1] + imm + 2], memory[reg[rs1] + imm + 3]);
 				// 16 bit value
 				// sh
 				} else if (func3 == 0b001) {
