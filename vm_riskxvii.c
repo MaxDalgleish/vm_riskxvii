@@ -21,7 +21,7 @@ int big_endian(int memory[], int pc_val) {
 void register_dump(int pc, int *reg) {
 	printf("PC = %08x", pc);
 	for (int i = 0; i < 32; i++) {
-		printf("R[%d] = 0x%08x", pc, reg[i]);
+		printf("R[%d] = 0x%08x\n", pc, reg[i]);
 	}
 }
 
@@ -402,8 +402,8 @@ int main(int argc, char **argv) {
 				break;
 			}
 			default: {
-				printf("Instruction not implemeneted: ");
-				printf("%x\n", instruction);
+				printf("Instruction Not Implemented: ");
+				printf("0x%x\n", instruction);
 				register_dump(pc_val, reg);
 				exit(1);
 			}
