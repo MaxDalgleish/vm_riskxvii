@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
 					} else {
-						reg[rd] = memory[reg[rs1] + imm];
+						reg[rd] = (memory[reg[rs1] + imm] << 24) | (memory[reg[rs1] + imm + 1] << 16 | memory[reg[rs1] + imm + 2] << 8 | memory[reg[rs1] + imm + 3]);
 					}
 				// load a 16 bit value
 				// lh
@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
 					} else {
-						reg[rd] = sign_extending(memory[reg[rs1] + imm] & 0xFFFF, 16);
+						reg[rd] = sign_extending((memory[reg[rs1] + imm + 2] << 8) | memory[reg[rs1] + imm + 3], 16);
 					}
 				// load a 8 bit value
 				// lb
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
 					} else {
-						reg[rd] = sign_extending(memory[reg[rs1] + imm] & 0xFF, 8);
+						reg[rd] = sign_extending(memory[reg[rs1] + imm + 3], 8);
 					}
 				// load a unsigned 8 bit value
 				// lbu
@@ -322,7 +322,10 @@ int main(int argc, char **argv) {
 					if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
 					} else {
-						memory[reg[rs1] + imm] = (reg[rs2] & 0xFFFFFFFF);
+						memory[reg[rs1] + imm] = (reg[rs2] >> 24) & 0xFF;
+						memory[reg[rs1] + imm + 1] = (reg[rs2] >> 16) & 0xFF;
+						memory[reg[rs1] + imm + 2] = (reg[rs2] >> 8) & 0xFF;
+						memory[reg[rs1] + imm + 3] = reg[rs2] & 0xFF;
 					}
 				// 16 bit value
 				// sh
@@ -330,7 +333,8 @@ int main(int argc, char **argv) {
 					if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
 					} else {
-						memory[reg[rs1] + imm] = (reg[rs2] & 0xFFFF);
+						memory[reg[rs1] + imm] = (reg[rs2] >> 8) & 0xFF;
+						memory[reg[rs1] + imm + 1] = reg[rs2] & 0xFF;
 					}
 				// 8 bit value
 				// sb
@@ -338,7 +342,7 @@ int main(int argc, char **argv) {
 					if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
 					} else {
-						memory[reg[rs1] + imm] = (reg[rs2] & 0xFF);
+						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
 					}
 				}
 				break;
