@@ -291,6 +291,7 @@ int main(int argc, char **argv) {
 				} else if (func3 == 0b101 && func7 == 0) {
 					printf("h %x h  d %d d\n", reg[rs1], reg[rs2]);
 					reg[rd] = reg[rs1] >> reg[rs2];
+					printf("a %x a", reg[rd]);
 				// Rotate Right;
 				// SRA
 				} else if (func3 == 0b101 && func7 == 0x20) {
