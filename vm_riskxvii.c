@@ -90,7 +90,7 @@ int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem) {
 
 		// CPU Halt
 		case 0x80c: {
-			printf("CPU Halt Requested\n");
+			printf("CPU Halt Requested a\n");
 			exit(0);
 		}
 
@@ -410,6 +410,5 @@ int main(int argc, char **argv) {
 		}
 		pc_val += 4;
 	}
-	printf("\n%x", pc_val);
 	return 0;
 }
