@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
 					reg[rd] = reg[rs1] & reg[rs2];
 				// SHIFT LEFT
 				} else if (func3 == 0b001 && func7 == 0) {
-					// reg[rd] = ((unsigned int) reg[rs1] << (unsigned int) reg[rs2]);
+					reg[rd] = ((unsigned int) reg[rs1] << (unsigned int) reg[rs2]);
 				// SHIFT RIGHT
 				} else if (func3 == 0b101 && func7 == 0) {
 					reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
@@ -409,5 +409,5 @@ int main(int argc, char **argv) {
 		}
 		pc_val += 4;
 	}
-	return 1;
+	return 0;
 }
