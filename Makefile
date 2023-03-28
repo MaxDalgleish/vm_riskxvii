@@ -10,7 +10,7 @@ OBJ        = $(SRC:.c=.o)
 all:$(TARGET)
 
 $(TARGET):$(OBJ)
-	$(CC) $(ASAN_FLAGS) -oz $@ $(OBJ)
+	$(CC) $(ASAN_FLAGS) -o $@ $(OBJ)
 
 .SUFFIXES: .c .o
 
