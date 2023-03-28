@@ -409,5 +409,5 @@ int main(int argc, char **argv) {
 		}
 		pc_val += 4;
 	}
-	return 0;
+	return 1;
 }
