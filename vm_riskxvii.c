@@ -288,16 +288,16 @@ int main(int argc, char **argv) {
 					reg[rd] = ((unsigned int) reg[rs1] << (unsigned int) reg[rs2]);
 				// SHIFT RIGHT
 				} else if (func3 == 0b101 && func7 == 0) {
-					reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
+					// reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
 				// Rotate Right;
 				// SRA
 				} else if (func3 == 0b101 && func7 == 0x20) {
-					// int temp = reg[rs1];
-					// for (int i = 0; i < reg[rs2]; i++) {
-					// 	int num = (temp & 0b1) << 31;
-					// 	temp = (temp >> 1) | num;
-					// }
-					// reg[rd] = temp;
+					int temp = reg[rs1];
+					for (int i = 0; i < reg[rs2]; i++) {
+						int num = (temp & 0b1) << 31;
+						temp = (temp >> 1) | num;
+					}
+					reg[rd] = temp;
 					;
 				// SLT
 				} else if (func3 == 0b010 && func7 == 0) {
