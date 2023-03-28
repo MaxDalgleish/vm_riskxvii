@@ -285,10 +285,10 @@ int main(int argc, char **argv) {
 					reg[rd] = reg[rs1] & reg[rs2];
 				// SHIFT LEFT
 				} else if (func3 == 0b001 && func7 == 0) {
-					reg[rd] = ((unsigned int) reg[rs1] << (unsigned int) reg[rs2]);
+					// reg[rd] = ((unsigned int) reg[rs1] << (unsigned int) reg[rs2]);
 				// SHIFT RIGHT
 				} else if (func3 == 0b101 && func7 == 0) {
-					// reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
+					reg[rd] = ((unsigned int) reg[rs1] >> (unsigned int) reg[rs2]);
 				// Rotate Right;
 				// SRA
 				} else if (func3 == 0b101 && func7 == 0x20) {
@@ -298,7 +298,6 @@ int main(int argc, char **argv) {
 						temp = (temp >> 1) | num;
 					}
 					reg[rd] = temp;
-					;
 				// SLT
 				} else if (func3 == 0b010 && func7 == 0) {
 					reg[rd] = (reg[rs1] < reg[rs2] ? 1 : 0);
