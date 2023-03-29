@@ -8,7 +8,7 @@
 // add the heap functionality
 typedef struct heap_bank {
 	bool used;
-	uint16_t size;
+	u_int16_t size;
 } heap_bank;
 
 int big_endian(int memory[], int pc_val) {
@@ -71,7 +71,7 @@ int sb_imm(int instruction) {
 	return imm;
 }
 
-uint16_t heap_malloc(int size, heap_bank *heap_banks) {
+u_int16_t heap_malloc(int size, heap_bank *heap_banks) {
 	int required_banks = (size + 64 - 1) / 64;
 	int multiple_banks = 0;
 	int starting_bank_pos = -1;
