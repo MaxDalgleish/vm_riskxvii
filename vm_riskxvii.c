@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 
 // TODO
 // add the heap functionality
-
+typedef struct heap_bank {
+	bool used;
+	uint16_t size;
+} heap_bank;
 
 int big_endian(int memory[], int pc_val) {
 	int a = memory[pc_val];
@@ -67,7 +71,61 @@ int sb_imm(int instruction) {
 	return imm;
 }
 
-int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem) {
+uint16_t heap_malloc(int size, heap_bank *heap_banks) {
+	int required_banks = (size + 64 - 1) / 64;
+	int multiple_banks = 0;
+	int starting_bank_pos = -1;
+
+    for (int i = 0; i < 128; ++i) {
+        if (!heap_banks[i].used) {
+            if (multiple_banks == 0) {
+                starting_bank_pos = i;
+            }
+            multiple_banks++;
+        } else {
+           	multiple_banks = 0;
+        }
+
+        if (multiple_banks == required_banks) {
+            for (int j = starting_bank_pos; j < starting_bank_pos + multiple_banks; j++) {
+                heap_banks[j].used = true;
+				if (j == starting_bank_pos + multiple_banks - 1) {
+					heap_banks[j].size = size % 64;
+				} else {
+					heap_banks[j].size = 64;
+				}
+            }
+            return 0xb700 + starting_bank_pos * 64;
+        }
+    }
+    return 0;
+}
+
+bool heap_free(int addr, heap_bank *heap_banks) {
+    if (addr < 0xb700 || addr >= 0xb700 + 128 * 64) {
+        return false;
+    }
+
+    int start_bank = (addr - 0xb700) / 64;
+
+    if (!heap_banks[start_bank].used) {
+        return false;
+    }
+
+    int total_size = heap_banks[start_bank].size;
+    heap_banks[start_bank].used = false;
+    heap_banks[start_bank].size = 0;
+
+    for (int i = start_bank + 1; total_size > 64; i++) {
+        total_size -= 64;
+        heap_banks[i].used = false;
+        heap_banks[i].size = 0;
+    }
+
+    return true;
+}
+
+int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
 	switch (mem_val)
 	{
 		// print value being stored as ascii
@@ -124,6 +182,17 @@ int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem) {
 			printf("%u", mem[param]);
 			return 0;
 		}
+
+		case 0x830: {
+			reg[28] = heap_malloc(param, heap_banks);
+			return 0;
+		}
+
+		case 0x834: {
+			heap_free(param, heap_banks);
+			return 0;
+		}
+
 	}
 
 	return 0;
@@ -135,6 +204,7 @@ int main(int argc, char **argv) {
 	int reg[32] = {0};
 	int memory[2048] = {0};
 	int pc_val = 0;
+	heap_bank heap_banks[128];
 	FILE *bin_input = fopen(argv[1], "rb");
 	for (int i = 0; i < 2048; i++) {
 
@@ -218,7 +288,7 @@ int main(int argc, char **argv) {
 				// lw
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
+						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (memory[reg[rs1] + imm] << 24) | (memory[reg[rs1] + imm + 1] << 16 | memory[reg[rs1] + imm + 2] << 8 | memory[reg[rs1] + imm + 3]);
 					}
@@ -226,7 +296,7 @@ int main(int argc, char **argv) {
 				// lh
 				} else if (func3 == 0b001) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
+						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = sign_extending((memory[reg[rs1] + imm + 2] << 8) | memory[reg[rs1] + imm + 3], 16);
 					}
@@ -234,7 +304,7 @@ int main(int argc, char **argv) {
 				// lb
 				} else if (func3 == 0) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
+						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = sign_extending(memory[reg[rs1] + imm + 3], 8);
 					}
@@ -242,7 +312,7 @@ int main(int argc, char **argv) {
 				// lbu
 				} else if (func3 == 0b100) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
+						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFF;
 					}
@@ -250,7 +320,7 @@ int main(int argc, char **argv) {
 				// lhu
 				} else if (func3 == 0b101) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory);
+						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFFFF;
 					}
@@ -319,7 +389,7 @@ int main(int argc, char **argv) {
 				// sw
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
+						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = (reg[rs2] >> 24) & 0xFF;
 						memory[reg[rs1] + imm + 1] = (reg[rs2] >> 16) & 0xFF;
@@ -330,7 +400,7 @@ int main(int argc, char **argv) {
 				// sh
 				} else if (func3 == 0b001) {
 					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
+						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = (reg[rs2] >> 8) & 0xFF;
 						memory[reg[rs1] + imm + 1] = reg[rs2] & 0xFF;
@@ -339,7 +409,7 @@ int main(int argc, char **argv) {
 				// sb
 				} else if (func3 == 0) {
 					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory);
+						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
 					}
