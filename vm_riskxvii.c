@@ -8,7 +8,7 @@
 // TODO
 // add the heap functionality
 typedef struct heap_bank {
-	u_int8_t data[64];
+	uint8_t data[64];
 	bool used;
 	int size;
 } heap_bank;
