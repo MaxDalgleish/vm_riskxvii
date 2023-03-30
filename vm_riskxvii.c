@@ -133,7 +133,6 @@ bool heap_free(int addr, heap_bank *heap_banks) {
 }
 
 int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, int instruction) {
-	printf("HER %x\n", mem_val);
 	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
         return 0;
     }
@@ -159,7 +158,6 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, in
 }
 
 void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size, int pc, int instruction) {
-	printf("HERE %x", mem_val);
 	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
         return;
     }
