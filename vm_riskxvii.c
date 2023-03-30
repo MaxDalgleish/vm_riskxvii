@@ -8,9 +8,9 @@
 // TODO
 // add the heap functionality
 typedef struct heap_bank {
+	int data[64];
 	bool used;
 	int size;
-	int data[64];
 } heap_bank;
 
 int big_endian(int memory[], int pc_val) {
