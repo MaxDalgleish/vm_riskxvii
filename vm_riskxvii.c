@@ -191,7 +191,6 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
-	// printf("h %x h %x h\n", mem_val, instruction);
 	switch (mem_val)
 	{
 		// print value being stored as ascii
@@ -296,6 +295,8 @@ int main(int argc, char **argv) {
 	while (pc_val < 1024) {
 		int instruction = big_endian(memory, pc_val);
 		int opcode = instruction & 0x7F;
+		printf("%d, %08x\n", pc_val, instruction);
+
 		switch (opcode)
 		{
 			// format I
@@ -363,6 +364,7 @@ int main(int argc, char **argv) {
 				}
 				int rs1 = rs1_extract(instruction);
 				int imm = sign_extending((instruction >> 20) & 0xFFF, 12);
+				printf("heap_value: %x\n", reg[rs1] + imm);
 				// load 32 bit value
 				// lw
 				if (func3 == 0b010) {
@@ -476,6 +478,7 @@ int main(int argc, char **argv) {
 				int imm = sign_extending(s_imm(instruction), 12);
 				// 32 bit value
 				// sw
+				printf("heap_value: %x\n", reg[rs1] + imm);
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
 						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 32, pc_val, instruction);
