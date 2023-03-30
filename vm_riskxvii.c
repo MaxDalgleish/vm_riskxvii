@@ -368,7 +368,7 @@ int main(int argc, char **argv) {
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
 						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32, pc_val, reg, instruction);
-						printf(" reg[rd] : %d", reg[rd]);
+						// printf(" reg[rd] : %d", reg[rd]);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
