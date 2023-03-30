@@ -30,7 +30,7 @@ void register_dump(int pc, int *reg) {
 }
 
 void illegal_operation(int pc, int *reg, int instruction) {
-	printf("Illegal Operation: 0x%x\n", instruction);
+	printf("Illegal Operation: 0x%08x\n", instruction);
 	register_dump(pc, reg);
 	exit(1);
 }
