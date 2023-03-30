@@ -129,7 +129,7 @@ bool heap_free(int addr, heap_bank *heap_banks) {
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
-	// printf("h %x h %x h\n", mem_val, instruction);
+	printf("h %x h %x h\n", mem_val, instruction);
 	switch (mem_val)
 	{
 		// print value being stored as ascii
