@@ -132,7 +132,7 @@ bool heap_free(int addr, heap_bank *heap_banks) {
     return true;
 }
 
-int heap_load(int mem_val, heap_bank *heap_banks, int size) {
+int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, int instruction) {
 	printf("HER %x\n", mem_val);
 	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
         return 0;
@@ -142,7 +142,8 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size) {
 	int data_addr = (mem_val - 0xb700) % 64;
 
 	if (!heap_banks[current_bank].used) {
-		printf("no\n");
+		illegal_operation(pc, reg, instruction);
+		exit(1);
 	}
 
 	int result = heap_banks[current_bank].data[data_addr] & 0xFF;
@@ -157,7 +158,7 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size) {
 	return result;
 }
 
-void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size) {
+void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size, int pc, int instruction) {
 	printf("HERE %x", mem_val);
 	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
         return;
@@ -165,7 +166,8 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 
 	int current_bank = (mem_val - 0xb700) / 64;
 	if (!heap_banks[current_bank].used) {
-		printf("yes");
+		illegal_operation(pc, reg, instruction);
+		exit(1);
 	}
 	int data_addr = (mem_val - 0xb700) % 64;
 
@@ -367,7 +369,7 @@ int main(int argc, char **argv) {
 				// lw
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
-						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32);
+						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32, pc_val, reg, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -377,7 +379,7 @@ int main(int argc, char **argv) {
 				// lh
 				} else if (func3 == 0b001) {
 					if (reg[rs1] + imm >= 0xb700) {
-						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 16);
+						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 16, pc_val, reg, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -387,7 +389,7 @@ int main(int argc, char **argv) {
 				// lb
 				} else if (func3 == 0) {
 					if (reg[rs1] + imm >= 0xb700) {
-						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 8);
+						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 8, pc_val, reg, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -397,7 +399,7 @@ int main(int argc, char **argv) {
 				// lbu
 				} else if (func3 == 0b100) {
 					if (reg[rs1] + imm >= 0xb700) {
-						reg[rd] = (unsigned int) heap_load(reg[rs1] + imm, heap_banks, 8);
+						reg[rd] = (unsigned int) heap_load(reg[rs1] + imm, heap_banks, 8, pc_val, reg, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = (unsigned int) virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -407,7 +409,7 @@ int main(int argc, char **argv) {
 				// lhu
 				} else if (func3 == 0b101) {
 					if (reg[rs1] + imm >= 0xb700) {
-						reg[rd] = (unsigned int) heap_load(reg[rs1] + imm, heap_banks, 16);
+						reg[rd] = (unsigned int) heap_load(reg[rs1] + imm, heap_banks, 16, pc_val, reg, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = (unsigned int) virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -478,7 +480,7 @@ int main(int argc, char **argv) {
 				// sw
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
-						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 32);
+						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 32, pc_val, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
@@ -491,7 +493,7 @@ int main(int argc, char **argv) {
 				// sh
 				} else if (func3 == 0b001) {
 					if (reg[rs1] + imm >= 0xb700) {
-						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 16);
+						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 16, pc_val, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
@@ -502,7 +504,7 @@ int main(int argc, char **argv) {
 				// sb
 				} else if (func3 == 0) {
 					if (reg[rs1] + imm >= 0xb700) {
-						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 8);
+						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 8, pc_val, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
