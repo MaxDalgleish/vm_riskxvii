@@ -152,10 +152,10 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, in
 	}
 
 	if (size > 16) {
-		printf("HERE\n");
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 2] & 0xFF);
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 3] & 0xFF);
 	}
+	printf("%d", result);
 	return result;
 }
 
