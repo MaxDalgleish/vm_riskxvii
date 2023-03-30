@@ -9,7 +9,8 @@
 // add the heap functionality
 typedef struct heap_bank {
 	bool used;
-	uint16_t size;
+	int size;
+	char data[64];
 } heap_bank;
 
 int big_endian(int memory[], int pc_val) {
@@ -116,11 +117,9 @@ bool heap_free(int addr, heap_bank *heap_banks) {
     }
 
     int total_size = heap_banks[start_bank].size;
-    heap_banks[start_bank].used = false;
-    heap_banks[start_bank].size = 0;
 
-    for (int i = start_bank + 1; total_size > 64; i++) {
-        total_size -= 64;
+    for (int i = start_bank; total_size > 0; i++) {
+        total_size -= 1;
         heap_banks[i].used = false;
         heap_banks[i].size = 0;
     }
@@ -203,6 +202,8 @@ int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, 
 		case 0xb700 ... (0xb700 + (128 * 64)): {
 			if (!heap_banks[mem_val - 0xb700].used) {
 				illegal_operation(pc, reg, instruction);
+			} else {
+				
 			}
 			return 0;
 		}
@@ -301,6 +302,7 @@ int main(int argc, char **argv) {
 				// load 32 bit value
 				// lw
 				if (func3 == 0b010) {
+					printf("first\n");
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -309,6 +311,7 @@ int main(int argc, char **argv) {
 				// load a 16 bit value
 				// lh
 				} else if (func3 == 0b001) {
+					printf("second\n");
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
@@ -317,6 +320,7 @@ int main(int argc, char **argv) {
 				// load a 8 bit value
 				// lb
 				} else if (func3 == 0) {
+					printf("third\n");
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
