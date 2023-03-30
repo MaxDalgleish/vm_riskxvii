@@ -98,6 +98,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
         }
 
         if (multiple_banks == required_banks) {
+			printf("HER");
             for (int j = starting_bank_pos; j < starting_bank_pos + multiple_banks; j++) {
                 heap_banks[j].used = true;
 				heap_banks[j].size = required_banks + starting_bank_pos - j;
