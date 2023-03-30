@@ -172,6 +172,7 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 	}
 	int data_addr = (mem_val - 0xb700) % 64;
 
+	printf("param is: %x", param);
 	if (size > 16) {
 		heap_banks[current_bank].data[data_addr] = ((param >> 24) & 0XFF);
 		data_addr++;
@@ -520,7 +521,7 @@ int main(int argc, char **argv) {
 				value = value | heap_banks[0].data[2];
 				value = value << 8;
 				value = value | heap_banks[0].data[3];
-				printf("value is: %d", value);
+				printf("value is: %x", value);
 				break;
 			}
 		
