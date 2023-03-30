@@ -189,6 +189,7 @@ int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, 
 
 		case 0x830: {
 			reg[28] = heap_malloc(param, heap_banks);
+			printf("x %x x", reg[28]);
 			return 0;
 		}
 
