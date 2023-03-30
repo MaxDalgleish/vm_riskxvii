@@ -110,7 +110,6 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
 }
 
 bool heap_free(int addr, heap_bank *heap_banks) {
-	printf("HERE\n");
     if (addr < 0xb700 || addr >= 0xb700 + 128 * 64) {
         return false;
     }
@@ -131,6 +130,56 @@ bool heap_free(int addr, heap_bank *heap_banks) {
     }
 
     return true;
+}
+
+int heap_load(int mem_val, heap_bank *heap_banks, int size) {
+	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
+        return 0;
+    }
+
+	int current_bank = (mem_val - 0xb700) / 64;
+	int data_addr = (mem_val - 0xb700) % 64;
+
+	int result = heap_banks[current_bank].data[data_addr] & 0xFF;
+	if (size > 8) {
+		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 1] & 0xFF);
+	}
+
+	if (size > 16) {
+		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 2] & 0xFF);
+		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 3] & 0xFF);
+	}
+	return result;
+}
+
+void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size) {
+	//memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
+	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
+        return;
+    }
+
+	int current_bank = (mem_val - 0xb700) / 64;
+	int data_addr = (mem_val - 0xb700) % 64;
+
+	int value = reg[param];
+	if (size > 16) {
+		for (int i = 31; i > 15; i--) {
+			heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
+			data_addr += 1;
+		}
+	}
+
+	if (size > 8) {
+		for (int i = 15; i > 7; i--) {
+			heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
+			data_addr += 1;
+		}
+	}
+
+	for (int i = 7; i > -1; i--) {
+		heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
+		data_addr += 1;
+	}
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
@@ -309,7 +358,9 @@ int main(int argc, char **argv) {
 				// load 32 bit value
 				// lw
 				if (func3 == 0b010) {
-					if (reg[rs1] + imm >= 0x800) {
+					if (reg[rs1] + imm >= 0xb700) {
+						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32);
+					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (memory[reg[rs1] + imm] << 24) | (memory[reg[rs1] + imm + 1] << 16 | memory[reg[rs1] + imm + 2] << 8 | memory[reg[rs1] + imm + 3]);
@@ -317,7 +368,9 @@ int main(int argc, char **argv) {
 				// load a 16 bit value
 				// lh
 				} else if (func3 == 0b001) {
-					if (reg[rs1] + imm >= 0x800) {
+					if (reg[rs1] + imm >= 0xb700) {
+						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 16);
+					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = sign_extending((memory[reg[rs1] + imm + 2] << 8) | memory[reg[rs1] + imm + 3], 16);
@@ -325,7 +378,9 @@ int main(int argc, char **argv) {
 				// load a 8 bit value
 				// lb
 				} else if (func3 == 0) {
-					if (reg[rs1] + imm >= 0x800) {
+					if (reg[rs1] + imm >= 0xb700) {
+						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 8);
+					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = sign_extending(memory[reg[rs1] + imm + 3], 8);
@@ -333,16 +388,20 @@ int main(int argc, char **argv) {
 				// load a unsigned 8 bit value
 				// lbu
 				} else if (func3 == 0b100) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+					if (reg[rs1] + imm >= 0xb700) {
+						reg[rd] = (unsigned int) heap_load(reg[rs1] + imm, heap_banks, 8);
+					} else if (reg[rs1] + imm >= 0x800) {
+						reg[rd] = (unsigned int) virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFF;
 					}
 				// load a unsigned 16 bit value
 				// lhu
 				} else if (func3 == 0b101) {
-					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+					if (reg[rs1] + imm >= 0xb700) {
+						reg[rd] = (unsigned int) heap_load(reg[rs1] + imm, heap_banks, 16);
+					} else if (reg[rs1] + imm >= 0x800) {
+						reg[rd] = (unsigned int) virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFFFF;
 					}
@@ -410,7 +469,9 @@ int main(int argc, char **argv) {
 				// 32 bit value
 				// sw
 				if (func3 == 0b010) {
-					if (reg[rs1] + imm >= 0x800) {
+					if (reg[rs1] + imm >= 0xb700) {
+						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 32);
+					} else if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = (reg[rs2] >> 24) & 0xFF;
@@ -421,7 +482,9 @@ int main(int argc, char **argv) {
 				// 16 bit value
 				// sh
 				} else if (func3 == 0b001) {
-					if (reg[rs1] + imm >= 0x800) {
+					if (reg[rs1] + imm >= 0xb700) {
+						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 16);
+					} else if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = (reg[rs2] >> 8) & 0xFF;
@@ -430,7 +493,9 @@ int main(int argc, char **argv) {
 				// 8 bit value
 				// sb
 				} else if (func3 == 0) {
-					if (reg[rs1] + imm >= 0x800) {
+					if (reg[rs1] + imm >= 0xb700) {
+						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 8);
+					} else if (reg[rs1] + imm >= 0x800) {
 						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
