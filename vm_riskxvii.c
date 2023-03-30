@@ -174,18 +174,18 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 	 
 
 	if (size > 16) {
-		heap_banks[current_bank].data[data_addr] | ((param >> 24) & 0xFF);
+		heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] | ((param >> 24) & 0xFF);
 		heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] << 8;
-		heap_banks[current_bank].data[data_addr] | ((param >> 16) & 0xFF);
+		heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] | ((param >> 16) & 0xFF);
 		heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] << 8;
 	}
 
 	if (size > 8) {
-		heap_banks[current_bank].data[data_addr] | ((param >> 8) & 0xFF);
+		heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] | ((param >> 8) & 0xFF);
 		heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] << 8;
 	}
 
-	heap_banks[current_bank].data[data_addr] | ((param) & 0xFF);
+	heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] | ((param) & 0xFF);
 	printf("inside save: %d", heap_banks[current_bank].data[data_addr]);
 }
 
