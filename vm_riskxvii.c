@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
 	while (pc_val < 1024) {
 		int instruction = big_endian(memory, pc_val);
 		int opcode = instruction & 0x7F;
-		printf("%d, %08x\n", pc_val, instruction);
+		printf("%x, %08x\n", pc_val, instruction);
 
 		switch (opcode)
 		{
