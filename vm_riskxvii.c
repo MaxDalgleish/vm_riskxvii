@@ -199,6 +199,11 @@ int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, 
 			return 0;
 		}
 
+		case 0xb700 ... (0xb700 + (128 * 64)): {
+			printf("HERE\n");
+			return 0;
+		}
+
 	}
 
 	return 0;
