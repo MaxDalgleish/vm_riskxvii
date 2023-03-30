@@ -80,6 +80,7 @@ int sb_imm(int instruction) {
 }
 
 uint16_t heap_malloc(int size, heap_bank *heap_banks) {
+	printf("%d \n", size);
 	int required_banks = (size + 64 - 1) / 64;
 	int multiple_banks = 0;
 	int starting_bank_pos = -1;
