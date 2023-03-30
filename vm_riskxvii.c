@@ -141,6 +141,10 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size) {
 	int current_bank = (mem_val - 0xb700) / 64;
 	int data_addr = (mem_val - 0xb700) % 64;
 
+	if (!heap_banks[current_bank].used) {
+		printf("no\n");
+	}
+
 	int result = heap_banks[current_bank].data[data_addr] & 0xFF;
 	if (size > 8) {
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 1] & 0xFF);
@@ -160,6 +164,9 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
     }
 
 	int current_bank = (mem_val - 0xb700) / 64;
+	if (!heap_banks[current_bank].used) {
+		printf("yes");
+	}
 	int data_addr = (mem_val - 0xb700) % 64;
 
 	int value = reg[param];
