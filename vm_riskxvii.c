@@ -302,7 +302,7 @@ int main(int argc, char **argv) {
 				// load 32 bit value
 				// lw
 				if (func3 == 0b010) {
-					printf("first\n");
+					printf("first\n %08x", instruction);
 					if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
