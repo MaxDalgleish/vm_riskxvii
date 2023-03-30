@@ -219,6 +219,10 @@ int main(int argc, char **argv) {
 	int memory[2048] = {0};
 	int pc_val = 0;
 	heap_bank heap_banks[128];
+	for (int i = 0; i < 128; i++) {
+		heap_banks[i].size = 0;
+		heap_banks[i].used = false;
+	}
 	FILE *bin_input = fopen(argv[1], "rb");
 	for (int i = 0; i < 2048; i++) {
 
