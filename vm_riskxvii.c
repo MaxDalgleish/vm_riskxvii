@@ -103,7 +103,6 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
 					heap_banks[j].size = 0;
 				}
             }
-			printf("malloc memory location: %x ", 0xb700 + starting_bank_pos * 64);
             return 0xb700 + starting_bank_pos * 64;
         }
     }
@@ -156,7 +155,7 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, in
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 2] & 0xFF);
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 3] & 0xFF);
 	}
-	printf("%d", result);
+	// printf("%d", result);
 	return result;
 }
 
@@ -172,7 +171,7 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 	}
 	int data_addr = (mem_val - 0xb700) % 64;
 
-	printf("param is: %x", param);
+	// printf("param is: %x", param);
 	if (size > 16) {
 		heap_banks[current_bank].data[data_addr] = ((param >> 24) & 0XFF);
 		data_addr++;
@@ -362,7 +361,7 @@ int main(int argc, char **argv) {
 				}
 				int rs1 = rs1_extract(instruction);
 				int imm = sign_extending((instruction >> 20) & 0xFFF, 12);
-				printf("heap_value: %x\n", reg[rs1] + imm);
+				// printf("heap_value: %x\n", reg[rs1] + imm);
 				// load 32 bit value
 				// lw
 				
@@ -478,9 +477,9 @@ int main(int argc, char **argv) {
 				int imm = sign_extending(s_imm(instruction), 12);
 				// 32 bit value
 				// sw
-				printf("heap_value: %x\n", reg[rs1] + imm);
+				// printf("heap_value: %x\n", reg[rs1] + imm);
 				if (func3 == 0b010) {
-					printf("sw values: %d %d %d ", reg[rs1], imm, reg[rs2]);
+					// printf("sw values: %d %d %d ", reg[rs1], imm, reg[rs2]);
 					if (reg[rs1] + imm >= 0xb700) {
 						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 32, pc_val, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
@@ -513,15 +512,15 @@ int main(int argc, char **argv) {
 						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
 					}
 				}
-				int value = 0;
-				value = value | heap_banks[0].data[0];
-				value = value << 8;
-				value = value | heap_banks[0].data[1];
-				value = value << 8;
-				value = value | heap_banks[0].data[2];
-				value = value << 8;
-				value = value | heap_banks[0].data[3];
-				printf("value is: %x\n", value);
+				// int value = 0;
+				// value = value | heap_banks[0].data[0];
+				// value = value << 8;
+				// value = value | heap_banks[0].data[1];
+				// value = value << 8;
+				// value = value | heap_banks[0].data[2];
+				// value = value << 8;
+				// value = value | heap_banks[0].data[3];
+				// printf("value is: %x\n", value);
 				break;
 			}
 		
