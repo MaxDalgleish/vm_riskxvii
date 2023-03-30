@@ -372,7 +372,7 @@ int main(int argc, char **argv) {
 				
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
-						printf(" %d %d", rs1, rd);
+						printf(" %d %d", reg[rd], reg[rs1] + imm);
 						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32, pc_val, reg, instruction);
 						printf("lw values: %d %d %d ", reg[rs1], imm, reg[rd]);
 					} else if (reg[rs1] + imm >= 0x800) {
