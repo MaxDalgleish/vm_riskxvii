@@ -90,11 +90,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
         if (multiple_banks == required_banks) {
             for (int j = starting_bank_pos; j < starting_bank_pos + multiple_banks; j++) {
                 heap_banks[j].used = true;
-				if (j == starting_bank_pos + multiple_banks - 1) {
-					heap_banks[j].size = size % 64;
-				} else {
-					heap_banks[j].size = 64;
-				}
+				heap_banks[j].size = required_banks + starting_bank_pos - j;
             }
             return 0xb700 + starting_bank_pos * 64;
         }
