@@ -189,6 +189,7 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 		heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
 		data_addr += 1;
 	}
+	printf("inside save: %d", value);
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
