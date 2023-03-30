@@ -170,7 +170,7 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 	}
 	int data_addr = (mem_val - 0xb700) % 64;
 
-	int value = reg[param];
+	int value = param;
 	if (size > 16) {
 		for (int i = 31; i > 15; i--) {
 			heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
