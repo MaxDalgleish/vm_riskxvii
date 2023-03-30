@@ -369,9 +369,11 @@ int main(int argc, char **argv) {
 				printf("heap_value: %x\n", reg[rs1] + imm);
 				// load 32 bit value
 				// lw
+				
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
 						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32, pc_val, reg, instruction);
+						printf("lw values: %d %d %d ", reg[rs1], imm, reg[rs2]);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
