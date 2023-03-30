@@ -84,7 +84,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
 	int multiple_banks = 0;
 	int starting_bank_pos = -1;
 
-    for (int i = 0; i < 128; ++i) {
+    for (int i = 0; i < 128; i++) {
         if (!heap_banks[i].used) {
             if (multiple_banks == 0) {
                 starting_bank_pos = i;
@@ -95,9 +95,13 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
         }
 
         if (multiple_banks == required_banks) {
-            for (int j = starting_bank_pos; j < starting_bank_pos + multiple_banks; j++) {
+            for (int j = starting_bank_pos; j < required_banks; j++) {
                 heap_banks[j].used = true;
-				heap_banks[j].size = required_banks + starting_bank_pos - j;
+				if (j == starting_bank_pos) {
+					heap_banks[j].size = starting_bank_pos + required_banks - 1;
+				} else {
+					heap_banks[j].size = 0;
+				}
             }
             return 0xb700 + starting_bank_pos * 64;
         }
@@ -120,8 +124,7 @@ bool heap_free(int addr, heap_bank *heap_banks) {
     heap_banks[start_bank].used = false;
     heap_banks[start_bank].size = 0;
 
-    for (int i = start_bank + 1; total_size > 64; i++) {
-        total_size -= 64;
+    for (int i = start_bank; i < start_bank + total_size; i++) {
         heap_banks[i].used = false;
         heap_banks[i].size = 0;
     }
