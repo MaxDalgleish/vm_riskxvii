@@ -110,6 +110,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
 }
 
 bool heap_free(int addr, heap_bank *heap_banks) {
+	printf("HERE\n");
     if (addr < 0xb700 || addr >= 0xb700 + 128 * 64) {
         return false;
     }
