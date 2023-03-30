@@ -103,6 +103,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
 					heap_banks[j].size = 0;
 				}
             }
+			printf("malloc memory location: %x ", 0xb700 + starting_bank_pos * 64);
             return 0xb700 + starting_bank_pos * 64;
         }
     }
