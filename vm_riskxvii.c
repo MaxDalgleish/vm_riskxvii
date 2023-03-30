@@ -481,6 +481,7 @@ int main(int argc, char **argv) {
 				// sw
 				printf("heap_value: %x\n", reg[rs1] + imm);
 				if (func3 == 0b010) {
+					printf("sw values: %d %d %d ", reg[rs1], imm, reg[rs2]);
 					if (reg[rs1] + imm >= 0xb700) {
 						heap_save(reg[rs1] + imm, reg, reg[rs2], heap_banks, 32, pc_val, instruction);
 					} else if (reg[rs1] + imm >= 0x800) {
