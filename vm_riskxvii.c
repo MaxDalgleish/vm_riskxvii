@@ -93,6 +93,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
             multiple_banks++;
         } else {
 			printf("h");
+			printf("%d\n", heap_banks[i].used);
            	multiple_banks = 0;
         }
 
