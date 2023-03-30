@@ -85,7 +85,7 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
 	int multiple_banks = 0;
 	int starting_bank_pos = -1;
 
-    for (int i = 0; i < 128; ++i) {
+    for (int i = 0; i < 128; i++) {
         if (!heap_banks[i].used) {
             if (multiple_banks == 0) {
                 starting_bank_pos = i;
