@@ -22,6 +22,12 @@ int big_endian(int memory[], int pc_val) {
 
 }
 
+void illegal_operation(int pc, int *reg, int instruction) {
+	printf("Illegal Operation: 0x%x\n", instruction);
+	register_dump(pc, reg);
+	exit(1);
+}
+
 void register_dump(int pc, int *reg) {
 	printf("PC = 0x%08x;\n", pc);
 	for (int i = 0; i < 32; i++) {
@@ -122,7 +128,7 @@ bool heap_free(int addr, heap_bank *heap_banks) {
     return true;
 }
 
-int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
+int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
 	switch (mem_val)
 	{
 		// print value being stored as ascii
@@ -186,7 +192,9 @@ int virtual_routines(int mem_val, int param, int pc, int *reg, int *mem, heap_ba
 		}
 
 		case 0x834: {
-			heap_free(param, heap_banks);
+			if (!heap_free(param, heap_banks)) {
+				illegal_operation(pc, reg, instruction);
+			}
 			return 0;
 		}
 
@@ -285,7 +293,7 @@ int main(int argc, char **argv) {
 				// lw
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (memory[reg[rs1] + imm] << 24) | (memory[reg[rs1] + imm + 1] << 16 | memory[reg[rs1] + imm + 2] << 8 | memory[reg[rs1] + imm + 3]);
 					}
@@ -293,7 +301,7 @@ int main(int argc, char **argv) {
 				// lh
 				} else if (func3 == 0b001) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = sign_extending((memory[reg[rs1] + imm + 2] << 8) | memory[reg[rs1] + imm + 3], 16);
 					}
@@ -301,7 +309,7 @@ int main(int argc, char **argv) {
 				// lb
 				} else if (func3 == 0) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = sign_extending(memory[reg[rs1] + imm + 3], 8);
 					}
@@ -309,7 +317,7 @@ int main(int argc, char **argv) {
 				// lbu
 				} else if (func3 == 0b100) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFF;
 					}
@@ -317,7 +325,7 @@ int main(int argc, char **argv) {
 				// lhu
 				} else if (func3 == 0b101) {
 					if (reg[rs1] + imm >= 0x800) {
-						reg[rd] = virtual_routines(reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
+						reg[rd] = virtual_routines(instruction, reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
 						reg[rd] = (unsigned int) memory[reg[rs1] + imm] & 0xFFFF;
 					}
@@ -386,7 +394,7 @@ int main(int argc, char **argv) {
 				// sw
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
+						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = (reg[rs2] >> 24) & 0xFF;
 						memory[reg[rs1] + imm + 1] = (reg[rs2] >> 16) & 0xFF;
@@ -397,7 +405,7 @@ int main(int argc, char **argv) {
 				// sh
 				} else if (func3 == 0b001) {
 					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
+						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = (reg[rs2] >> 8) & 0xFF;
 						memory[reg[rs1] + imm + 1] = reg[rs2] & 0xFF;
@@ -406,7 +414,7 @@ int main(int argc, char **argv) {
 				// sb
 				} else if (func3 == 0) {
 					if (reg[rs1] + imm >= 0x800) {
-						virtual_routines(reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
+						virtual_routines(instruction, reg[rs1] + imm, reg[rs2], pc_val, reg, memory, heap_banks);
 					} else {
 						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
 					}
