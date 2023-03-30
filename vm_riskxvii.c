@@ -133,7 +133,7 @@ bool heap_free(int addr, heap_bank *heap_banks) {
 }
 
 int heap_load(int mem_val, heap_bank *heap_banks, int size) {
-	printf("HERE\n");
+	printf("HER\n");
 	if (mem_val < 0xb700 || mem_val >= 0xb700 + 128 * 64) {
         return 0;
     }
