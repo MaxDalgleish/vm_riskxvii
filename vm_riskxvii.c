@@ -200,7 +200,9 @@ int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, 
 		}
 
 		case 0xb700 ... (0xb700 + (128 * 64)): {
-			printf("HERE\n");
+			if (!heap_banks[mem_val - 0xb700].used) {
+				illegal_operation(pc, reg, instruction);
+			}
 			return 0;
 		}
 
