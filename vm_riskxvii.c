@@ -512,6 +512,15 @@ int main(int argc, char **argv) {
 						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
 					}
 				}
+				int value = 0;
+				value = heap_banks[0].data[0];
+				value = value << 8;
+				value = heap_banks[0].data[1];
+				value = value << 8;
+				value = heap_banks[0].data[2];
+				value = value << 8;
+				value = heap_banks[0].data[3];
+				printf("value is: %d", value);
 				break;
 			}
 		
