@@ -22,17 +22,17 @@ int big_endian(int memory[], int pc_val) {
 
 }
 
-void illegal_operation(int pc, int *reg, int instruction) {
-	printf("Illegal Operation: 0x%x\n", instruction);
-	register_dump(pc, reg);
-	exit(1);
-}
-
 void register_dump(int pc, int *reg) {
 	printf("PC = 0x%08x;\n", pc);
 	for (int i = 0; i < 32; i++) {
 		printf("R[%d] = 0x%08x;\n", i, reg[i]);
 	}
+}
+
+void illegal_operation(int pc, int *reg, int instruction) {
+	printf("Illegal Operation: 0x%x\n", instruction);
+	register_dump(pc, reg);
+	exit(1);
 }
 
 // sign extends an imm
