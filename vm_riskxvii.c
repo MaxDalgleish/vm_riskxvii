@@ -10,6 +10,7 @@
 typedef struct heap_bank {
 	bool used;
 	int size;
+	int data[64];
 } heap_bank;
 
 int big_endian(int memory[], int pc_val) {
