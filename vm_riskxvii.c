@@ -147,6 +147,7 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, in
 	}
 
 	int result = heap_banks[current_bank].data[data_addr] & 0xFF;
+
 	if (size > 8) {
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 1] & 0xFF);
 	}
@@ -171,26 +172,21 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 	}
 	int data_addr = (mem_val - 0xb700) % 64;
 
-	int value = param;
+
 	if (size > 16) {
-		for (int i = 31; i > 15; i--) {
-			heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
-			data_addr += 1;
-		}
+		heap_banks[current_bank].data[data_addr] = ((param >> 24) & 0xFF);
+		heap_banks[current_bank].data[data_addr] <<= 8;
+		heap_banks[current_bank].data[data_addr] = ((param >> 16) & 0xFF);
+		heap_banks[current_bank].data[data_addr] <<= 8;
 	}
 
 	if (size > 8) {
-		for (int i = 15; i > 7; i--) {
-			heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
-			data_addr += 1;
-		}
+		heap_banks[current_bank].data[data_addr] = ((param >> 8) & 0xFF);
+		heap_banks[current_bank].data[data_addr] <<= 8;
 	}
 
-	for (int i = 7; i > -1; i--) {
-		heap_banks[current_bank].data[data_addr] = (value >> i) & 1;
-		data_addr += 1;
-	}
-	printf("inside save: %d", value);
+	heap_banks[current_bank].data[data_addr] = ((param) & 0xFF);
+	printf("inside save: %d", heap_banks[current_bank].data[data_addr]);
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
