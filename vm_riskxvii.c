@@ -521,7 +521,7 @@ int main(int argc, char **argv) {
 				value = value | heap_banks[0].data[2];
 				value = value << 8;
 				value = value | heap_banks[0].data[3];
-				printf("value is: %x", value);
+				printf("value is: %x %x %x %x %x", heap_banks[0].data[0], heap_banks[0].data[1], heap_banks[0].data[2], heap_banks[0].data[3], value);
 				break;
 			}
 		
