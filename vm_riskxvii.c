@@ -186,7 +186,6 @@ void heap_save(int mem_val, int *reg, int param, heap_bank *heap_banks, int size
 	}
 
 	heap_banks[current_bank].data[data_addr] = heap_banks[current_bank].data[data_addr] | ((param) & 0xFF);
-	printf("inside save: %d", heap_banks[current_bank].data[data_addr]);
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
@@ -514,6 +513,13 @@ int main(int argc, char **argv) {
 						memory[reg[rs1] + imm] = reg[rs2] & 0xFF;
 					}
 				}
+				int value = 0;
+				for (int i = 0; i < 32; i++) {
+					value = value | heap_banks[0].data[i];
+					value = value << 1;
+				}
+				value = value >> 1;
+				printf("value: %d", value);
 				break;
 			}
 		
