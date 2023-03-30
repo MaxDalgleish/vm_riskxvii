@@ -80,7 +80,6 @@ int sb_imm(int instruction) {
 }
 
 uint16_t heap_malloc(int size, heap_bank *heap_banks) {
-	printf("%d \n", size);
 	int required_banks = (size + 64 - 1) / 64;
 	int multiple_banks = 0;
 	int starting_bank_pos = -1;
@@ -92,13 +91,10 @@ uint16_t heap_malloc(int size, heap_bank *heap_banks) {
             }
             multiple_banks++;
         } else {
-			printf("h");
-			printf("%d\n", heap_banks[i].used);
            	multiple_banks = 0;
         }
 
         if (multiple_banks == required_banks) {
-			printf("HER");
             for (int j = starting_bank_pos; j < starting_bank_pos + multiple_banks; j++) {
                 heap_banks[j].used = true;
 				heap_banks[j].size = required_banks + starting_bank_pos - j;
@@ -132,18 +128,19 @@ bool heap_free(int addr, heap_bank *heap_banks) {
 }
 
 int heap_access(heap_bank *heap_banks, int mem_val, int param, int pc, int *reg, int instruction, int s_or_l) {
-	if (!heap_banks[(mem_val - 0xb700) / 64].used) {
-		illegal_operation(pc, reg, instruction);
-		exit(1);
-	}
-	if (s_or_l >= 0 || s_or_l <= 4) {
-		if (s_or_l == 0) {
-
-		}
-	} else {
-
-	}
 	return 0;
+	// if (!heap_banks[(mem_val - 0xb700) / 64].used) {
+	// 	illegal_operation(pc, reg, instruction);
+	// 	exit(1);
+	// }
+	// if (s_or_l >= 0 || s_or_l <= 4) {
+	// 	if (s_or_l == 0) {
+
+	// 	}
+	// } else {
+
+	// }
+	// return 0;
 }
 
 int virtual_routines(int instruction, int mem_val, int param, int pc, int *reg, int *mem, heap_bank *heap_banks) {
