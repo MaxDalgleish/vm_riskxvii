@@ -152,6 +152,7 @@ int heap_load(int mem_val, heap_bank *heap_banks, int size, int pc, int *reg, in
 	}
 
 	if (size > 16) {
+		printf("HERE\n");
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 2] & 0xFF);
 		result = (result << 8) | (heap_banks[current_bank].data[data_addr + 3] & 0xFF);
 	}
@@ -372,9 +373,8 @@ int main(int argc, char **argv) {
 				
 				if (func3 == 0b010) {
 					if (reg[rs1] + imm >= 0xb700) {
-						printf(" %d %d", reg[rd], reg[rs1] + imm);
 						reg[rd] = heap_load(reg[rs1] + imm, heap_banks, 32, pc_val, reg, instruction);
-						printf("lw values: %d %d %d ", reg[rs1], imm, reg[rd]);
+						printf(" reg[rd] : %d", reg[rd]);
 					} else if (reg[rs1] + imm >= 0x800) {
 						reg[rd] = virtual_routines(instruction,reg[rs1] + imm, 0, pc_val, reg, memory, heap_banks);
 					} else {
