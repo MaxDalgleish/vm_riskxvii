@@ -566,10 +566,10 @@ int main(int argc, char **argv) {
 				printf("Instruction Not Implemented: ");
 				printf("0x%x\n", instruction);
 				register_dump(pc_val, reg);
-				exit(1);
+				exit(0);
 			}
 		}
 		pc_val += 4;
 	}
-	return 1;
+	return 0;
 }
